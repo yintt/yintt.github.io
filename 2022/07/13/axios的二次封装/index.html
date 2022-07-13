@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="目录：  axios二次封装代码requests.js  mock的axios二次封装：mockRequests.js  mock的API接口管理：index.js  组件内发请求只需引入axios二次封装的文件即可，如下面的代码需要在发送请求的组件内引入requests，不需再引入axios  axios是发送请求的服务，采用axios的方式的话，哪里用到发送请求都需要用到axios，二次封装的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://example.com/2022/07/13/axios%E7%9A%84%E4%BA%8C%E6%AC%A1%E5%B0%81%E8%A3%85/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="目录：  axios二次封装代码requests.js  mock的axios二次封装：mockRequests.js  mock的API接口管理：index.js  组件内发请求只需引入axios二次封装的文件即可，如下面的代码需要在发送请求的组件内引入requests，不需再引入axios  axios是发送请求的服务，采用axios的方式的话，哪里用到发送请求都需要用到axios，二次封装的">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-07-13T07:31:43.685Z">
+<meta property="article:modified_time" content="2022-07-13T07:31:43.801Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-axios的二次封装" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/07/13/axios%E7%9A%84%E4%BA%8C%E6%AC%A1%E5%B0%81%E8%A3%85/" class="article-date">
+  <time class="dt-published" datetime="2022-07-13T07:31:43.685Z" itemprop="datePublished">2022-07-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>目录：</p>
+<ul>
+<li><p>axios二次封装代码requests.js</p>
+</li>
+<li><p>mock的axios二次封装：mockRequests.js</p>
+</li>
+<li><p>mock的API接口管理：index.js</p>
+</li>
+<li><p>组件内发请求只需引入axios二次封装的文件即可，如下面的代码需要在发送请求的组件内引入requests，不需再引入axios</p>
+</li>
+<li><p>axios是发送请求的服务，采用axios的方式的话，哪里用到发送请求都需要用到axios，二次封装的目的是为了添加请求和响应拦截器</p>
+</li>
+<li><p>前端向服务器发送请求的方法：XMLHttpRequest、fetch、JQ、axios；</p>
+</li>
+<li><p>为什么要进行二次封装axios？</p>
+</li>
+</ul>
+<p>​             答：添加<strong>请求拦截器</strong>和<strong>响应拦截器</strong>，请求拦截器可以在发请求之前处理一些业务，响应拦截器当服务器数据返回以后可以处理一些事情。</p>
+<ul>
+<li>项目的api文件夹下存放处理axios请求的文件</li>
+</ul>
+<p>封装代码：requests.js      请求真实数据</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//对于axios进行二次封装</span></span><br><span class="line"><span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">&quot;axios&quot;</span>;</span><br><span class="line"><span class="comment">//获取仓库:存储数据</span></span><br><span class="line"><span class="keyword">import</span> store <span class="keyword">from</span> <span class="string">&quot;@/store&quot;</span>;</span><br><span class="line"><span class="comment">//引入进度条</span></span><br><span class="line"><span class="keyword">import</span> nprogress <span class="keyword">from</span> <span class="string">&#x27;nprogress&#x27;</span>;</span><br><span class="line"><span class="comment">//引入相关进度条的样式</span></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;nprogress/nprogress.css&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//axios.create方法执行,其实返回一个axios和request一样的</span></span><br><span class="line"><span class="keyword">let</span> requests = axios.<span class="title function_">create</span>(&#123;</span><br><span class="line">    <span class="comment">//基础路径,发请求URL携带api【发现:真实服务器接口都携带/api】</span></span><br><span class="line">    <span class="attr">baseURL</span>: <span class="string">&quot;/api&quot;</span>,</span><br><span class="line">    <span class="comment">//超时的设置</span></span><br><span class="line">    <span class="attr">timeout</span>: <span class="number">5000</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//请求拦截器:将来项目中【N个请求】，只要发请求,会触发请求拦截器!!!</span></span><br><span class="line">requests.<span class="property">interceptors</span>.<span class="property">request</span>.<span class="title function_">use</span>(<span class="function"><span class="params">config</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">//请求拦截器:请求头【header】,请求头能否给服务器携带参数</span></span><br><span class="line">    <span class="comment">//请求拦截器：其实项目中还有一个重要的作用,给服务器携带请求们的公共的参数</span></span><br><span class="line">    <span class="comment">//进度条开始</span></span><br><span class="line">    nprogress.<span class="title function_">start</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (store.<span class="property">state</span>.<span class="property">shopcart</span>.<span class="property">USER_ID</span>) &#123;</span><br><span class="line">        config.<span class="property">headers</span>.<span class="property">userTempId</span> = store.<span class="property">state</span>.<span class="property">shopcart</span>.<span class="property">USER_ID</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//token[公共参数]</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(store.<span class="property">state</span>.<span class="property">user</span>.<span class="property">token</span>)&#123;</span><br><span class="line">        config.<span class="property">headers</span>.<span class="property">token</span> = store.<span class="property">state</span>.<span class="property">user</span>.<span class="property">token</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//每一次发请求,请求头携带用户临时身份</span></span><br><span class="line">    <span class="comment">// config.headers.userTempId = SET_USERID();</span></span><br><span class="line">    <span class="comment">//不管那个模块发请求,请求拦截器，都可以触发。请求拦截器可以通过请求头每一次协带公共参数给服务器【用户未登录的临时身份】</span></span><br><span class="line">    <span class="keyword">return</span> config;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//响应拦截器：请求数据返回会执行</span></span><br><span class="line">requests.<span class="property">interceptors</span>.<span class="property">response</span>.<span class="title function_">use</span>(<span class="function">(<span class="params">res</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">//res:实质就是项目中发请求、服务器返回的数据</span></span><br><span class="line">    <span class="comment">//进度条结束</span></span><br><span class="line">    nprogress.<span class="title function_">done</span>();</span><br><span class="line">    <span class="keyword">return</span> res.<span class="property">data</span>;</span><br><span class="line">&#125;, <span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">//温馨提示:某一天发请求,请求失败,请求失败的信息打印出来</span></span><br><span class="line">    <span class="title function_">alert</span>(err.<span class="property">message</span>);</span><br><span class="line">    <span class="comment">//终止Promise链</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Promise</span>();</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//最后需要暴露:暴露的是添加新的功能的axios,即为requests</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> requests;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//对于axios进行二次封装</span></span><br><span class="line"><span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">&quot;axios&quot;</span>;</span><br><span class="line"><span class="comment">//获取仓库:存储数据</span></span><br><span class="line"><span class="keyword">import</span> store <span class="keyword">from</span> <span class="string">&quot;@/store&quot;</span>;</span><br><span class="line"><span class="comment">//引入进度条</span></span><br><span class="line"><span class="keyword">import</span> nprogress <span class="keyword">from</span> <span class="string">&#x27;nprogress&#x27;</span>;</span><br><span class="line"><span class="comment">//引入相关进度条的样式</span></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;nprogress/nprogress.css&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//axios.create方法执行,其实返回一个axios和request一样的</span></span><br><span class="line"><span class="keyword">let</span> requests = axios.<span class="title function_">create</span>(&#123;</span><br><span class="line">    <span class="comment">//基础路径,发请求URL携带api【发现:真实服务器接口都携带/api】</span></span><br><span class="line">    <span class="attr">baseURL</span>: <span class="string">&quot;/api&quot;</span>,</span><br><span class="line">    <span class="comment">//超时的设置</span></span><br><span class="line">    <span class="attr">timeout</span>: <span class="number">5000</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//请求拦截器:将来项目中【N个请求】，只要发请求,会触发请求拦截器!!!</span></span><br><span class="line">requests.<span class="property">interceptors</span>.<span class="property">request</span>.<span class="title function_">use</span>(<span class="function"><span class="params">config</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">//请求拦截器:请求头【header】,请求头能否给服务器携带参数</span></span><br><span class="line">    <span class="comment">//请求拦截器：其实项目中还有一个重要的作用,给服务器携带请求们的公共的参数</span></span><br><span class="line">    <span class="comment">//进度条开始</span></span><br><span class="line">    nprogress.<span class="title function_">start</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (store.<span class="property">state</span>.<span class="property">shopcart</span>.<span class="property">USER_ID</span>) &#123;</span><br><span class="line">        config.<span class="property">headers</span>.<span class="property">userTempId</span> = store.<span class="property">state</span>.<span class="property">shopcart</span>.<span class="property">USER_ID</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//token[公共参数]</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(store.<span class="property">state</span>.<span class="property">user</span>.<span class="property">token</span>)&#123;</span><br><span class="line">        config.<span class="property">headers</span>.<span class="property">token</span> = store.<span class="property">state</span>.<span class="property">user</span>.<span class="property">token</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//每一次发请求,请求头携带用户临时身份</span></span><br><span class="line">    <span class="comment">// config.headers.userTempId = SET_USERID();</span></span><br><span class="line">    <span class="comment">//不管那个模块发请求,请求拦截器，都可以触发。请求拦截器可以通过请求头每一次协带公共参数给服务器【用户未登录的临时身份】</span></span><br><span class="line">    <span class="keyword">return</span> config;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//响应拦截器：请求数据返回会执行</span></span><br><span class="line">requests.<span class="property">interceptors</span>.<span class="property">response</span>.<span class="title function_">use</span>(<span class="function">(<span class="params">res</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">//res:实质就是项目中发请求、服务器返回的数据</span></span><br><span class="line">    <span class="comment">//进度条结束</span></span><br><span class="line">    nprogress.<span class="title function_">done</span>();</span><br><span class="line">    <span class="keyword">return</span> res.<span class="property">data</span>;</span><br><span class="line">&#125;, <span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">//温馨提示:某一天发请求,请求失败,请求失败的信息打印出来</span></span><br><span class="line">    <span class="title function_">alert</span>(err.<span class="property">message</span>);</span><br><span class="line">    <span class="comment">//终止Promise链</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Promise</span>();</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//最后需要暴露:暴露的是添加新的功能的axios,即为requests</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> requests;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<ul>
+<li>mock的axios二次封装：mockRequests.js    请求mock虚拟数据</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//对于axios进行二次封装</span></span><br><span class="line"><span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">&quot;axios&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//引入进度条</span></span><br><span class="line"><span class="keyword">import</span> nprogress <span class="keyword">from</span> <span class="string">&#x27;nprogress&#x27;</span>;</span><br><span class="line"><span class="comment">//引入相关进度条的样式</span></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;nprogress/nprogress.css&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//axios.create方法执行,其实返回一个axios和request一样的</span></span><br><span class="line"><span class="keyword">let</span> requests = axios.<span class="title function_">create</span>(&#123;</span><br><span class="line">    <span class="comment">//基础路径,发请求URL携带api【发现:真实服务器接口都携带/api】</span></span><br><span class="line">    <span class="attr">baseURL</span>: <span class="string">&quot;/mock&quot;</span>,</span><br><span class="line">    <span class="comment">//超时的设置</span></span><br><span class="line">    <span class="attr">timeout</span>: <span class="number">5000</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//请求拦截器:将来项目中【N个请求】，只要发请求,会触发请求拦截器!!!</span></span><br><span class="line">requests.<span class="property">interceptors</span>.<span class="property">request</span>.<span class="title function_">use</span>(<span class="function"><span class="params">config</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">//请求拦截器:请求头【header】,请求头能否给服务器携带参数</span></span><br><span class="line">    <span class="comment">//请求拦截器：其实项目中还有一个重要的作用,给服务器携带请求们的公共的参数</span></span><br><span class="line">    <span class="comment">//进度条开始</span></span><br><span class="line">    nprogress.<span class="title function_">start</span>();</span><br><span class="line">    <span class="keyword">return</span> config;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//响应拦截器：请求数据返回会执行</span></span><br><span class="line">requests.<span class="property">interceptors</span>.<span class="property">response</span>.<span class="title function_">use</span>(<span class="function">(<span class="params">res</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">//res:实质就是项目中发请求、服务器返回的数据</span></span><br><span class="line">    <span class="comment">//进度条结束</span></span><br><span class="line">    nprogress.<span class="title function_">done</span>();</span><br><span class="line">    <span class="keyword">return</span> res.<span class="property">data</span>;</span><br><span class="line">&#125;, <span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">//温馨提示:某一天发请求,请求失败,请求失败的信息打印出来</span></span><br><span class="line">    <span class="title function_">alert</span>(err.<span class="property">message</span>);</span><br><span class="line">    <span class="comment">//终止Promise链</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Promise</span>();</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//最后需要暴露:暴露的是添加新的功能的axios,即为requests</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> requests;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<ul>
+<li>mock的API接口管理：index.js</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//统一管理项目前部的接口</span></span><br><span class="line"><span class="keyword">import</span> requests <span class="keyword">from</span> <span class="string">&quot;./requests&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> mockRequests <span class="keyword">from</span> <span class="string">&#x27;./mockRequests&#x27;</span>;</span><br><span class="line"><span class="comment">//封装函数:复用</span></span><br><span class="line"><span class="comment">//将来这个函数可以在别的地方使用,需要对外暴露【分别暴露】</span></span><br><span class="line"><span class="comment">//获取商品分类的数据</span></span><br><span class="line"><span class="comment">//export const reqCategory = () =&gt; &#123;</span></span><br><span class="line">   <span class="comment">//箭头函数可以在程序任意地方使用,箭头函数返回即为服务器的数据</span></span><br><span class="line">   <span class="comment">//下面箭头函数返回值：返回的是什么? promise,即为返回服务器的数据</span></span><br><span class="line">   <span class="comment">//return关键字，千万别忘记书写，如果忘记书写，你在任意地方获取的都是undeinfed</span></span><br><span class="line">   <span class="comment">//return requests(&#123; method: &#x27;get&#x27;, url: &#x27;/product/getBaseCategoryList&#x27; &#125;);</span></span><br><span class="line"><span class="comment">//&#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//获取首页轮播图数据的接口,url: &#x27;/banner&#x27;中的banner是放在mock文件夹下的json文件</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqBannerList</span> = (<span class="params"></span>) =&gt; <span class="title function_">mockRequests</span>(&#123; <span class="attr">url</span>: <span class="string">&#x27;/banner&#x27;</span>, <span class="attr">method</span>: <span class="string">&#x27;get&#x27;</span> &#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//搜索模块的请求接口函数:</span></span><br><span class="line"><span class="comment">//将来根据不同的搜索条件,需要给服务器携带不同的参数</span></span><br><span class="line"><span class="comment">//请求体携带搜索的参数</span></span><br><span class="line"><span class="comment">//搜索的条件:它应该是一个对象10K,可有可无，但是data至少是一个空对象</span></span><br><span class="line"><span class="comment">//没有发现:</span></span><br><span class="line"><span class="comment">//第一步:整理搜索的参数</span></span><br><span class="line"><span class="comment">//第二步：根据最新的搜索参数，获取最新的数据展示!!</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqSearchList</span> = (<span class="params">data</span>)=&gt;<span class="title function_">requests</span>(&#123;<span class="attr">url</span>:<span class="string">&#x27;/list&#x27;</span>,<span class="attr">method</span>:<span class="string">&#x27;post&#x27;</span>,data&#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//详情模块商品的数据</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqDetailList</span> = (<span class="params">skuId</span>)=&gt;<span class="title function_">requests</span>(&#123;<span class="attr">url</span>:<span class="string">`/item/<span class="subst">$&#123;skuId&#125;</span>`</span>,<span class="attr">method</span>:<span class="string">&#x27;get&#x27;</span>&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//加入购物车|将来修改商品个数的接口</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqAddOrUpdateCart</span> = (<span class="params">skuId,skuNum</span>)=&gt;<span class="title function_">requests</span>(&#123;<span class="attr">url</span>:<span class="string">`/cart/addToCart/<span class="subst">$&#123;skuId&#125;</span>/<span class="subst">$&#123;skuNum&#125;</span>`</span>,<span class="attr">method</span>:<span class="string">&#x27;post&#x27;</span>&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//获取用户购物车的数据接口</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqShopCart</span> = (<span class="params"></span>)=&gt;<span class="title function_">requests</span>(&#123;<span class="attr">url</span>:<span class="string">&#x27;/cart/cartList&#x27;</span>,<span class="attr">method</span>:<span class="string">&#x27;get&#x27;</span>&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//删除某一个商品的接口</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqDeleteCart</span> = (<span class="params">skuId</span>)=&gt;<span class="title function_">requests</span>(&#123;<span class="attr">url</span>:<span class="string">`/cart/deleteCart/<span class="subst">$&#123;skuId&#125;</span>`</span>,<span class="attr">method</span>:<span class="string">&#x27;delete&#x27;</span>&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//修改某一个商品的勾选的状态</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqUpdateChecked</span>=(<span class="params">skuId,isChecked</span>)=&gt;<span class="title function_">requests</span>(&#123;<span class="attr">url</span>:<span class="string">`/cart/checkCart/<span class="subst">$&#123;skuId&#125;</span>/<span class="subst">$&#123;isChecked&#125;</span>`</span>,<span class="attr">method</span>:<span class="string">&#x27;get&#x27;</span>&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//获取验证码接口</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqGetCode</span> = (<span class="params">phone</span>)=&gt;<span class="title function_">requests</span>(&#123;<span class="attr">url</span>:<span class="string">`/user/passport/sendCode/<span class="subst">$&#123;phone&#125;</span>`</span>,<span class="attr">method</span>:<span class="string">&#x27;get&#x27;</span>&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//注册的接口</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqRegister</span> = (<span class="params">data</span>)=&gt;<span class="title function_">requests</span>(&#123;<span class="attr">url</span>:<span class="string">`/user/passport/register`</span>,<span class="attr">method</span>:<span class="string">&#x27;post&#x27;</span>,data&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//登录的接口:请求体携带参数 phone&amp;&amp;password</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqUserLogin</span> = (<span class="params">data</span>)=&gt;<span class="title function_">requests</span>(&#123;<span class="attr">url</span>:<span class="string">`/user/passport/login`</span>,<span class="attr">method</span>:<span class="string">&#x27;post&#x27;</span>,data&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//获取用户登录成功以后用户信息的接口</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqUserInfo</span> = (<span class="params"></span>)=&gt;<span class="title function_">requests</span>(&#123;<span class="attr">url</span>:<span class="string">`/user/passport/auth/getUserInfo`</span>,<span class="attr">method</span>:<span class="string">&#x27;get&#x27;</span>&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//退出登录业务</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqUserLogout</span> = (<span class="params"></span>)=&gt;<span class="title function_">requests</span>(&#123;<span class="attr">url</span>:<span class="string">`/user/passport/logout`</span>,<span class="attr">method</span>:<span class="string">&#x27;get&#x27;</span>&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//获取用户地址信息</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqAddressInfo</span> = (<span class="params"></span>)=&gt;<span class="title function_">requests</span>(&#123;<span class="attr">url</span>:<span class="string">`/user/userAddress/auth/findUserAddressList`</span>,<span class="attr">method</span>:<span class="string">&#x27;get&#x27;</span>&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//获取商品清单数据</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqShopInfo</span> = (<span class="params"></span>)=&gt;<span class="title function_">requests</span>(&#123;<span class="attr">url</span>:<span class="string">`/order/auth/trade`</span>,<span class="attr">method</span>:<span class="string">&#x27;get&#x27;</span>&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//提交订单接口</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqSubmitOrder</span> = (<span class="params">tradeNo,data</span>)=&gt;<span class="title function_">requests</span>(&#123;<span class="attr">url</span>:<span class="string">`/order/auth/submitOrder?tradeNo=<span class="subst">$&#123;tradeNo&#125;</span>`</span>,<span class="attr">method</span>:<span class="string">&#x27;post&#x27;</span>,data&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//获取支付信息接口</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqPayInfo</span> = (<span class="params">orderId</span>)=&gt;<span class="title function_">requests</span>(&#123;<span class="attr">url</span>:<span class="string">`/payment/weixin/createNative/<span class="subst">$&#123;orderId&#125;</span>`</span>,<span class="attr">method</span>:<span class="string">&#x27;get&#x27;</span>&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//查询支付结果</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqPayResult</span> = (<span class="params">orderId</span>)=&gt;<span class="title function_">requests</span>(&#123;<span class="attr">url</span>:<span class="string">`/payment/weixin/queryPayStatus/<span class="subst">$&#123;orderId&#125;</span>`</span>,<span class="attr">method</span>:<span class="string">&#x27;get&#x27;</span>&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//获取我的订单</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">reqMyOrderList</span> = (<span class="params">page,limit</span>)=&gt;<span class="title function_">requests</span>(&#123;<span class="attr">url</span>:<span class="string">`/order/auth/<span class="subst">$&#123;page&#125;</span>/<span class="subst">$&#123;limit&#125;</span>`</span>,<span class="attr">method</span>:<span class="string">&#x27;get&#x27;</span>&#125;);</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+<p>​                                                                              </p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/13/axios%E7%9A%84%E4%BA%8C%E6%AC%A1%E5%B0%81%E8%A3%85/" data-id="cl5jae6340000i0ve9qyjbtpc" data-title="" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">July 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/07/13/axios%E7%9A%84%E4%BA%8C%E6%AC%A1%E5%B0%81%E8%A3%85/">(no title)</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
